@@ -2,15 +2,16 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
-io = SocketIO(app)
+socketio = SocketIO(app)
 
 @app.route("/")
-def chat():
+def index():
     return render_template("Escrita.html")
 
-@io.on('sendMessage') 
-def send_message(msg):
-    emit('getMessage', msg, broadcast=True)  # Adicionado broadcast=True para enviar a todos os clientes
+# Recebe o conteúdo atualizado da div e envia para todos os clientes conectados
+@socketio.on('updateContent')
+def update_content(data):
+    emit('receiveUpdate', data, broadcast=True)  # Transmite o novo conteúdo para todos
 
 if __name__ == "__main__":
-    io.run(app, debug=True)
+    socketio.run(app, debug=True)
