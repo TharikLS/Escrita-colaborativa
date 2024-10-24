@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        .chat {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        span {
+            margin-bottom: 10px;
+        }
+        form {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- essa div representa aonde irá acontecer a escrita!!! -->
+    <div class="chat" id="chat"></div>
+
+    <!-- aqui são os input -->
+    <div>
+        <form id="form">
+            <input type="text" placeholder="Nome" >
+            <input type="text" placeholder="Mensagem">
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.0/socket.io.js"></script>
+    <script>
+        window.onload = function() {
+            const socket = io('http://127.0.0.1:5000');
+            const chatDiv = document.getElementById('chat');
+
+            socket.on('connect', () => {
+                socket.send('Usuário conectado ao socket');
+            });
+
+            document.getElementById("form").addEventListener("submit", function(event){
+                event.preventDefault();
+                
+               socket.emit('sendMessage', {name: event.target[0].value, message: event.target[1].value})
+               event.target[0].value = ""
+               event.target[1].value = ""
+            });
+
+            socket.on('getMessage', (msg) => {
+                // Adiciona a mensagem recebida ao chat
+                const span = document.createElement("span");
+                const chat = document.querySelector(".chat")
+                span.innerHTML = `<strong> ${msg.name}:</strong> ${msg.message}`
+                chat.append(span)
+            });
+        };
+    </script>
+</body>
+</html>
